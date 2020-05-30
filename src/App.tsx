@@ -1,26 +1,54 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState, useRef } from 'react';
+import { Chart } from './blocks/chart';
 import './App.css';
+import { computeEquity } from './math/computeEquity';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	const [hand1, setHand1] = useState("");
+	const [hand2, setHand2] = useState("");
+	const [result, setResult] = useState("");
+	const active = useRef(true);
+
+	const select = (hand: string) => {
+		if (active.current) {
+			if (hand.length === 2) {
+				hand = hand[0] + 'c' + hand[1] + 'd';
+			} else {
+				if (hand[2] === 's') {
+					hand = hand[0] + 'c' + hand[1] + 'c';
+				} else {
+					hand = hand[0] + 'c' + hand[1] + 'd';
+				}
+			}
+			setHand1(hand);
+		} else {
+			if (hand.length === 2) {
+				hand = hand[0] + 's' + hand[1] + 'h';
+			} else {
+				if (hand[2] === 's') {
+					hand = hand[0] + 's' + hand[1] + 's';
+				} else {
+					hand = hand[0] + 's' + hand[1] + 'h';
+				}
+			}
+			setHand2(hand);
+		}
+
+		active.current = !active.current;
+	};
+
+	const compute = () => {
+		setResult(computeEquity(hand1, hand2))
+	};
+
+	return (
+		<div>
+			<Chart select={select} />
+			<div>{`${hand1} vs ${hand2}`}</div>
+			<div>{result}</div>
+			<button disabled={!hand1 || !hand2} onClick={compute}>COMPUTE</button>
+		</div>
+	);
 }
 
 export default App;
