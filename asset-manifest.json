@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/KolosovAO/shortdeck/static/css/main.4d68ac42.chunk.css",
+    "main.js": "/KolosovAO/shortdeck/static/js/main.6b205815.chunk.js",
+    "main.js.map": "/KolosovAO/shortdeck/static/js/main.6b205815.chunk.js.map",
+    "runtime-main.js": "/KolosovAO/shortdeck/static/js/runtime-main.4c3f41e2.js",
+    "runtime-main.js.map": "/KolosovAO/shortdeck/static/js/runtime-main.4c3f41e2.js.map",
+    "static/js/2.fe14ff13.chunk.js": "/KolosovAO/shortdeck/static/js/2.fe14ff13.chunk.js",
+    "static/js/2.fe14ff13.chunk.js.map": "/KolosovAO/shortdeck/static/js/2.fe14ff13.chunk.js.map",
+    "index.html": "/KolosovAO/shortdeck/index.html",
+    "precache-manifest.3a0e848b0e7ba23af14217709c40e81e.js": "/KolosovAO/shortdeck/precache-manifest.3a0e848b0e7ba23af14217709c40e81e.js",
+    "service-worker.js": "/KolosovAO/shortdeck/service-worker.js",
+    "static/css/main.4d68ac42.chunk.css.map": "/KolosovAO/shortdeck/static/css/main.4d68ac42.chunk.css.map",
+    "static/js/2.fe14ff13.chunk.js.LICENSE.txt": "/KolosovAO/shortdeck/static/js/2.fe14ff13.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.4c3f41e2.js",
+    "static/js/2.fe14ff13.chunk.js",
+    "static/css/main.4d68ac42.chunk.css",
+    "static/js/main.6b205815.chunk.js"
+  ]
+}
