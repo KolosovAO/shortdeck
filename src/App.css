@@ -1,4 +1,10 @@
-.hand {
+.card-list {
+	display: flex;
+	flex-wrap: wrap;
+	width: 420px;
+}
+
+.card {
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -6,25 +12,37 @@
 	height: 40px;
 	border: 1px solid black;
 	margin: 2px;
-}
 
-.hand:hover {
-	opacity: 0.5;
 	cursor: pointer;
+
+	color: white;
+	font-size: 24px;
 }
 
-.hand-pair {
-	background-color: orange;
+.card__suite-c {
+	background-color: lightgreen;
 }
 
-.hand-offsuite {
+.card__suite-h {
+	background-color: lightcoral;
+}
+
+.card__suite-d {
 	background-color: lightblue;
 }
 
-.hand-suited {
-	background-color: lightsalmon;
+.card__suite-s {
+	background-color: black;
 }
 
-.cards-row {
+.card__empty {
+	background-color: lightgray;
+}
+
+.card__disabled {
+	opacity: 0.2;
+}
+
+.board, .player {
 	display: flex;
 }

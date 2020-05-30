@@ -54,11 +54,10 @@ const getKickers = (kickers: CardValue[], exclude: CardValue[]): CardValue[] => 
 
 const createCard = (str: string): Card => ({ value: mapping[str[0]], suit: str[1] as Suit });
 
-const computeCombination = (hand: string, board: string[]): FullCombination => {
+const computeCombination = (hand: string[], board: string[]): FullCombination => {
     const cards = [
         ...board.map(createCard),
-        createCard(hand.slice(0, 2)),
-        createCard(hand.slice(2))
+        ...hand.map(createCard)
     ].sort((a, b) => b.value - a.value);
     const kickers = cards.map((card) => card.value);
     const suite: Record<Suit, CardValue[]> = { s: [], c: [], d: [], h: [] };
@@ -149,10 +148,11 @@ const computeCombination = (hand: string, board: string[]): FullCombination => {
         };
     }
 
-    if (pairs.length === 2) {
+    if (pairs.length > 1) {
+        const best_pairs = pairs.slice(-2);
         return {
             combination: Combination.TWO_PAIRS,
-            kicker: [pairs[1], pairs[0], getKickers(kickers, pairs)[0]],
+            kicker: [best_pairs[1], best_pairs[0], getKickers(kickers, best_pairs)[0]],
         };
     }
 
@@ -169,7 +169,7 @@ const computeCombination = (hand: string, board: string[]): FullCombination => {
     };
 }
 
-export const compareHands = (hand1: string, hand2: string, board: string[]): 0 | 1 | 2 => {
+export const compareHands = (hand1: string[], hand2: string[], board: string[]): 0 | 1 | 2 => {
     const combination1 = computeCombination(hand1, board);
     const combination2 = computeCombination(hand2, board);
 

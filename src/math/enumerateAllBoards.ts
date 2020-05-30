@@ -5,10 +5,12 @@ const ALL_CARDS = '6789TJKQA'.split('').reduce<string[]>((acc, card) => {
     return acc;
 }, []);
 
-export const enumerateAllBoards = (dead_cards: string[]): string[][] => {
-    const available_cards = ALL_CARDS.filter((card) => !dead_cards.includes(card));
-
-    const progress: string[][] = [[]];
+export const enumerateAllBoards = (dead_cards: string[], board: string[] = []): string[][] => {
+    if (board.length === 5) {
+        return [board];
+    }
+    const available_cards = ALL_CARDS.filter((card) => !board.includes(card) && !dead_cards.includes(card));
+    const progress: string[][] = [board];
     const result: string[][] = [];
     while (available_cards.length) {
         const next_card = available_cards.pop()!;
@@ -16,10 +18,11 @@ export const enumerateAllBoards = (dead_cards: string[]): string[][] => {
             if (cards.length === 4) {
                 result.push(cards.concat(next_card));
             } else {
-                progress.push(cards.concat(next_card));
+                if (cards.length + available_cards.length > 4) {
+                    progress.push(cards.concat(next_card));
+                }
             }
         });
-        progress.push([next_card]);
     }
     return result;
 };
