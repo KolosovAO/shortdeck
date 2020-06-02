@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "4fdd3a9d02a259655d9f38727edef910",
+    "revision": "11caac7658a592f80f6072164cdd693e",
     "url": "/shortdeck/index.html"
   },
   {
-    "revision": "004b78c303ba1161907c",
+    "revision": "39568915cb916007390c",
     "url": "/shortdeck/static/css/main.88f4b956.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/shortdeck/static/js/2.3bf8d3df.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "004b78c303ba1161907c",
-    "url": "/shortdeck/static/js/main.bfb291be.chunk.js"
+    "revision": "39568915cb916007390c",
+    "url": "/shortdeck/static/js/main.b6dceaee.chunk.js"
   },
   {
     "revision": "27c4df0a3a6b2b777c48",
