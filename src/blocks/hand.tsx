@@ -1,19 +1,20 @@
 import React from 'react';
 
 type Props = {
-    cards: string;
+    hand: string;
     select: (hand: string) => void;
+    selected: boolean;
 }
 
-export const Hand: React.FC<Props> = ({ cards, select }) => {
-    const extra = cards.length === 2
-        ? 'hand-pair'
-        : cards[2] === 's'
-            ? 'hand-suited'
-            : 'hand-offsuite';
+export const Hand: React.FC<Props> = ({ hand, select, selected }) => {
+    const extra = hand.length === 2
+        ? 'hand__pair'
+        : hand[2] === 's'
+            ? 'hand__suited'
+            : 'hand__offsuite';
     return (
-        <div onClick={() => select(cards)} className={`hand ${extra}`}>
-            {cards}
+        <div onClick={() => select(hand)} className={`hand ${extra}${selected ? " hand__selected" : ""}`}>
+            {hand}
         </div>
     );
 };

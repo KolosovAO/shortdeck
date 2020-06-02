@@ -1,4 +1,4 @@
-const ALL_CARDS = '6789TJKQA'.split('').reduce<string[]>((acc, card) => {
+const ALL_CARDS = '6789TJQKA'.split('').reduce<string[]>((acc, card) => {
     ['c', 's', 'h', 'd'].forEach((suite) => {
         acc.push(card + suite);
     });
@@ -18,7 +18,7 @@ export const enumerateAllBoards = (dead_cards: string[], board: string[] = []): 
             if (cards.length === 4) {
                 result.push(cards.concat(next_card));
             } else {
-                if (cards.length + available_cards.length > 4) {
+                if (cards.length + available_cards.length > 3) {
                     progress.push(cards.concat(next_card));
                 }
             }

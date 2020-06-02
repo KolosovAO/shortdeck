@@ -21,6 +21,9 @@ type FullCombination = {
 }
 
 const getStraightHead = (values: CardValue[]): CardValue | undefined => {
+    if (values[0] === 14) {
+        values = [...values, 5 as CardValue];
+    }
     let last = 0;
     let count = 1;
     for (const value of values) {
