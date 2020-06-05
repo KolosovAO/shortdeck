@@ -172,21 +172,48 @@ const computeCombination = (hand: string[], board: string[]): FullCombination =>
     };
 }
 
-export const compareHands = (hand1: string[], hand2: string[], board: string[]): 0 | 1 | 2 => {
-    const combination1 = computeCombination(hand1, board);
-    const combination2 = computeCombination(hand2, board);
+type BestKicker = {
+    index: number;
+    kicker: number[];
+}
 
-    if (combination1.combination === combination2.combination) {
-        for (let i = 0; i < combination1.kicker.length; i++) {
-            if (combination1.kicker[i] > combination2.kicker[i]) {
-                return 1;
-            } else if (combination1.kicker[i] < combination2.kicker[i]) {
-                return 2;
+export const compareHands = (hands: string[][], board: string[]): number[] => {
+    const combinations = hands.map((hand) => computeCombination(hand, board));
+
+    let best_kickers: BestKicker[] = [];
+    let best_combo = 10;
+
+    combinations.forEach(({ combination, kicker }, index) => {
+        if (combination < best_combo) {
+            best_combo = combination;
+            best_kickers = [{
+                index,
+                kicker
+            }];
+        } else if (combination === best_combo) {
+            best_kickers.push({
+                index,
+                kicker
+            });
+        }
+    });
+
+    let winners: number[] = [];
+    let best_kicker = [-Infinity];
+
+    best_kickers.forEach(({ kicker, index }) => {
+        for (let i = 0; i < kicker.length; i++) {
+            if (kicker[i] > best_kicker[i]) {
+                best_kicker = kicker;
+                winners = [index];
+                break;
+            } else if (kicker[i] !== best_kicker[i]) {
+                break;
+            } else if (i === best_kicker.length - 1) {
+                winners.push(index);
             }
         }
+    });
 
-        return 0;
-    }
-
-    return combination1.combination < combination2.combination ? 1 : 2;
+    return winners;
 }

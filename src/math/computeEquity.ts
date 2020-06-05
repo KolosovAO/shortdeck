@@ -2,43 +2,54 @@ import { enumerateAllBoards } from './enumerateAllBoards';
 import { compareHands } from './combination';
 import { toCombos } from './combos';
 
-export const computeEquity = (hand1: string[], hand2: string[], current_board: string[]) => {
-    let win = 0;
-    let tie = 0;
-    let lose = 0;
-    const dead_cards = [...hand1, ...hand2];
-    enumerateAllBoards(dead_cards, current_board).forEach((board) => {
-        const res = compareHands(hand1, hand2, board);
-        if (res === 0) {
-            tie++;
-        } else if (res === 1) {
-            win++;
-        } else {
-            lose++;
-        }
-    });
+const prettifyBalance = (balance: number[]) => {
+    const e = balance.reduce((res, val) => res - val, 100) / balance.length;
 
-    const total = win + tie + lose;
-    return { win, tie, lose, total };
+    return balance.map((val) => Number((val + e).toFixed(2)));
 }
 
-export const computeEquityVsSpectre = (hand: string[], spectre: string[], current_board: string[]) => {
-    let w = 0;
-    let l = 0;
-    let t = 0;
+const computeWinsAndTotal = (hands: [string, string][], current_board: string[]) => {
+    const dead_cards = hands.flat();
+    const wins = Array(hands.length).fill(0);
+    let total = 0;
+    enumerateAllBoards(dead_cards, current_board).forEach((board) => {
+        total += 1;
+        const winners = compareHands(hands, board);
 
-    const combos = toCombos(spectre)
-        .filter((h) => !hand.includes(h[0]) && !hand.includes(h[1]) && !current_board.includes(h[0]) && !current_board.includes(h[1]));
+        winners.forEach((winner) => {
+            wins[winner] += 1 / winners.length;
+        });
+    });
+
+    return {
+        wins,
+        total
+    };
+}
+
+export const computeEquity = (hands: [string, string][], current_board: string[]) => {
+    const { wins, total } = computeWinsAndTotal(hands, current_board);
+    const raw_winners = wins.map((count) => Number((count / total * 100).toFixed(2)));
+
+    return prettifyBalance(raw_winners);
+}
+
+export const computeEquityVsSpectre = (hands: [string, string][], spectre: string[], current_board: string[]) => {
+    const dead_cards = hands.flat().concat(current_board);
+    const combos = toCombos(spectre).filter((h) => !dead_cards.includes(h[0]) && !dead_cards.includes(h[1]));
 
     return function* () {
-        for (const hand2 of combos) {
-            const { win, lose, tie } = computeEquity(hand, hand2, current_board);
-            w += win;
-            l += lose;
-            t += tie;
+        let w = Array(hands.length + 1).fill(0);
+        let t = 0;
 
-            const total = w + t + l;
-            yield { win: w, tie: t, lose: l, total };
+        for (const current_hand of combos) {
+            const { wins, total } = computeWinsAndTotal([...hands, current_hand], current_board);
+            console.log(wins, total);
+            w = w.map((count, index) => count + wins[index]);
+            t = t + total;
+
+            const raw_winners = w.map((count) => Number((count / t * 100).toFixed(2)));
+            yield prettifyBalance(raw_winners);
         }
     };
 };

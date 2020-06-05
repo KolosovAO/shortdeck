@@ -1,6 +1,6 @@
 .calculator {
 	width: 484px;
-	height: 620px;
+	height: 680px;
 	background: lightgray;
 }
 
@@ -67,7 +67,7 @@
 	border: 1px solid black;
 	margin: 2px;
 
-	opacity: 0.6;
+	opacity: 0.7;
 
 	cursor: pointer;
 	font-size: 20px;

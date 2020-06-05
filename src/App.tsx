@@ -1,125 +1,242 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { CardList } from './blocks/card_list';
 import { Cards } from './blocks/cards';
 import { Spectre } from './blocks/spectre';
 import './App.css';
 import { computeEquity, computeEquityVsSpectre } from './math/computeEquity';
 
-type Cards = Array<string | undefined>;
+type Board = [string | undefined, string | undefined, string | undefined, string | undefined, string | undefined];
+type PlayerHand = [string | undefined, string | undefined];
+
+type CardMode = 'spectre' | 'hand';
+
+type PlayerSpectreMode = {
+	mode: 'spectre';
+	spectre: string[];
+};
+
+type PlayerHandMode = {
+	mode: 'hand';
+	current_card_index: number;
+	hand: PlayerHand;
+}
+
+type PlayerInfo = (PlayerSpectreMode | PlayerHandMode) & { percent?: number; is_hero?: boolean; };
+
+const INIT_PLAYERS_INFO: PlayerInfo[] = [
+	{ mode: 'hand', is_hero: true, hand: [undefined, undefined], current_card_index: 0 },
+	...Array(4).fill(0).map<PlayerInfo>(() => ({ mode: 'hand', hand: [undefined, undefined], current_card_index: 0 }))
+];
 
 const compact = <T extends any>(val: T | undefined): val is NonNullable<T> => !!val;
 
 function App() {
+	const [players_info, setPlayersInfo] = useState(INIT_PLAYERS_INFO);
+
 	const [is_calculated, setIsCalculated] = useState(false);
 	const [show_cardlist, setShowCardList] = useState(false);
-	const [show_p2_spectre, setShowP2Spectre] = useState(false);
-	const [is_p2_spectre, setIsP2Spectre] = useState(false);
-	const [p2_spectre, setP2Spectre] = useState<string[]>([]);
-	const [board, setBoard] = useState<Cards>([undefined, undefined, undefined, undefined, undefined]);
-	const [p1, setP1] = useState<Cards>([undefined, undefined]);
-	const [p2, setP2] = useState<Cards>([undefined, undefined]);
-	const [p1_info, setP1Info] = useState('');
-	const [p2_info, setP2Info] = useState('');
-	const current_setter = useRef(setBoard);
-	const current_cards = useRef(board);
-	const current_index = useRef(0);
-	const cards_lost = useRef(0);
+	const [show_spectre, setShowSpectre] = useState(false);
 
-	const selectP1Cards = (index: number) => {
-		setShowCardList(true);
-		const new_p1 = p1.map((c, i) => i >= index ? undefined : c);
-		setP1(new_p1);
-		current_setter.current = setP1;
-		current_cards.current = new_p1;
-		cards_lost.current = 2 - index;
-		current_index.current = index;
-	};
+	const [active_player, setActivePlayer] = useState(0);
 
-	const selectP2Cards = (index: number) => {
-		setShowCardList(true);
-		const new_p2 = p2.map((c, i) => i >= index ? undefined : c);
-		setP2(new_p2);
-		current_setter.current = setP2;
-		current_cards.current = new_p2;
-		cards_lost.current = 2 - index;
-		current_index.current = index;
-	};
+	const [board, setBoard] = useState<Board>([undefined, undefined, undefined, undefined, undefined]);
+	const [board_active_index, setBoardActiveIndex] = useState(-1);
 
-	const selectBoard = (index: number) => {
-		setShowCardList(true);
-		const new_board = board.map((c, i) => i >= index ? undefined : c);
-		setBoard(new_board);
-		current_setter.current = setBoard;
-		current_cards.current = new_board;
-		cards_lost.current = index < 3
-			? 3 - index
-			: 1;
-		current_index.current = index;
-	}
+	const selected_player_info = players_info[active_player];
 
-	const selectCard = (card: string) => {
-		current_cards.current = current_cards.current.map((c, i) => i === current_index.current ? card : c);
-		current_index.current++;
-		current_setter.current(current_cards.current);
-		cards_lost.current--;
-		if (cards_lost.current === 0) {
-			setShowCardList(false);
+	const getPlayerCardSelector = (player_index: number) => (card_index: number) => {
+		const active_player_info = players_info[player_index];
+		setActivePlayer(player_index);
+		setBoardActiveIndex(-1);
+
+		if (active_player_info.mode === 'hand') {
+			setPlayersInfo(players_info.map((player_info, index) => index === player_index
+				? {
+					...active_player_info,
+					hand: card_index === 0
+						? [undefined, undefined]
+						: [active_player_info.hand[0], undefined],
+					current_card_index: card_index
+				}
+				: player_info
+			));
+			setShowCardList(true);
 		}
 	};
 
-	const selectP2Spectre = (hands: string[]) => {
-		setP2Spectre(hands);
-		setShowP2Spectre(false);
-	}
+	const playerShowSpectre = (player_index: number) => {
+		setActivePlayer(player_index);
+		setShowSpectre(true);
+	};
 
-	const p1_full = p1.filter(compact);
-	const p2_full = p2.filter(compact);
+	const selectBoardCard = (index: number) => {
+		setBoardActiveIndex(index);
+		setShowCardList(true);
+	};
+
+	const selectPlayerSpectre = (spectre: string[]) => {
+		setPlayersInfo(players_info.map((player_info, player_index) => player_index === active_player
+			? { mode: 'spectre', spectre }
+			: player_info
+		));
+		setShowSpectre(false);
+	};
+
+	const setSpectreMode = (index: number) => {
+		const current_spectre_mode_index = players_info.findIndex((info) => info.mode === "spectre");
+
+		setPlayersInfo(players_info.map((player_info, player_index) => player_index === current_spectre_mode_index
+			? { mode: 'hand', hand: [undefined, undefined], current_card_index: 0 }
+			: player_index === index
+				? { mode: 'spectre', spectre: [] }
+				: player_info
+		));
+	};
+
+	const rendered_players_info = players_info.map((player_info, index) => {
+		if (player_info.is_hero) {
+			return (
+				<>
+					Hero
+					{player_info.percent !== undefined && <span className="win_percent">{player_info.percent}</span>}
+					<Cards className="player" cards={(player_info as PlayerHandMode).hand} selectCard={getPlayerCardSelector(index)} />
+				</>
+			);
+		}
+
+
+		return (
+			<>
+				Player{index + 1}
+				<button onClick={() => setSpectreMode(index)}>$$$</button>
+				{player_info.percent !== undefined && <span className="win_percent">{player_info.percent}</span>}
+				{player_info.mode === "spectre"
+					? <button className="show_spectre" onClick={() => playerShowSpectre(index)}>{player_info.spectre.join(",") || "SELECT SPECTRE"}</button>
+					: <Cards className="player" cards={player_info.hand} selectCard={getPlayerCardSelector(index)} />
+				}
+			</>
+		);
+	});
 
 	const compute = () => {
-		if (is_p2_spectre && p2_spectre.length && p1_full.length === 2) {
-			const generator = computeEquityVsSpectre(p1_full, p2_spectre, board.filter(compact))();
+		const hands: [string, string][] = [];
+		const hand_index_to_percent: Record<number, number | undefined> = {};
+		let spectre: string[] | undefined = undefined;
+		let spectre_index: number | undefined = undefined;
+
+		players_info.forEach((player_info, index) => {
+			if (player_info.mode === 'spectre' && player_info.spectre.length) {
+				spectre_index = index;
+				spectre = player_info.spectre;
+			} else if (player_info.mode === 'hand' && player_info.hand[0] && player_info.hand[1]) {
+				hands.push(player_info.hand as [string, string]);
+				hand_index_to_percent[index] = 0;
+			}
+		});
+
+		if (!spectre) {
+			setIsCalculated(true);
+			setTimeout(() => {
+				const percent = computeEquity(hands, board.filter(compact));
+				let i = 0;
+				for (const key in hand_index_to_percent) {
+					hand_index_to_percent[key] = percent[i];
+					i++;
+				}
+
+				setPlayersInfo(players_info.map((player_info, index) => hand_index_to_percent[index]
+					? { ...player_info, percent: hand_index_to_percent[index] }
+					: player_info
+				));
+
+				setIsCalculated(false);
+			});
+		} else {
+			const generator = computeEquityVsSpectre(hands, spectre, board.filter(compact))();
 			const nextIteration = () => setTimeout(() => {
 				const next = generator.next();
 				if (next.done) {
 					setIsCalculated(false);
 					return;
 				} else {
-					const { win, tie, lose, total } = next.value;
-					setP1Info(String(((win / total + tie / 2 / total) * 100).toFixed(2)));
-					setP2Info(String(((lose / total + tie / 2 / total) * 100).toFixed(2)));
+					let i = 0;
+					for (const key in hand_index_to_percent) {
+						hand_index_to_percent[key] = next.value[i];
+						i++;
+					}
+
+					setPlayersInfo(players_info.map((player_info, index) => hand_index_to_percent[index] !== undefined
+						? { ...player_info, percent: hand_index_to_percent[index] }
+						: index === spectre_index
+							? { ...player_info, percent: next.value[next.value.length - 1] }
+							: player_info
+					));
+
 					nextIteration();
 				}
 			}, 5);
 			setIsCalculated(true);
 			nextIteration();
-		} else {
-			if (p1_full.length !== 2 || p2_full.length !== 2) {
-				return;
-			}
-			setIsCalculated(true);
-			setTimeout(() => {
-				const { win, tie, lose, total } = computeEquity(p1_full, p2_full, board.filter(compact));
-				setP1Info(String(((win / total + tie / 2 / total) * 100).toFixed(2)));
-				setP2Info(String(((lose / total + tie / 2 / total) * 100).toFixed(2)));
-				setIsCalculated(false);
-			});
 		}
 	}
 
-	const selected = [...p1, ...p2, ...board].filter(Boolean) as string[];
+	const selected_cards = players_info.reduce<string[]>((result, player_info) => {
+		if (player_info.mode === 'hand') {
+			return result.concat(player_info.hand.filter(compact));
+		}
 
-	const copyToClipboard = () => {
-		const str = is_p2_spectre && p2_spectre.length && p1_full.length === 2
-			? `${p1_full.join("")} vs ${p2_spectre.join(", ")} - ${p1_info}`
-			: p1_full.length === 2 || p2_full.length === 2
-				? `${p1_full.join("")} vs ${p2_full.join("")} - ${p1_info}`
-				: null;
+		return result;
+	}, board.filter(compact));
 
-		if (!str) {
+	const selectCard = (card: string) => {
+		if (board_active_index !== -1) {
+			setBoard(board.map((board_card, index) => index === board_active_index ? card : board_card) as Board);
+			if (board_active_index > 1) {
+				setShowCardList(false);
+			} else {
+				setBoardActiveIndex(board_active_index + 1);
+			}
+
 			return;
 		}
+
+		const current_card_index = (selected_player_info as PlayerHandMode).current_card_index;
+
+		setPlayersInfo(players_info.map((player_info, index) => index === active_player
+			? {
+				...selected_player_info,
+				hand: current_card_index === 0
+					? [card, undefined]
+					: [(selected_player_info as PlayerHandMode).hand[0], card],
+				current_card_index: current_card_index + 1,
+			}
+			: player_info
+		));
+
+		if (current_card_index === 1) {
+			setShowCardList(false);
+		}
+	};
+
+	const copyToClipboard = () => {
+		const { hands, percents } = players_info.reduce((res, player_info) => {
+			if (player_info.mode === 'hand' && player_info.hand[0] && player_info.hand[1]) {
+				res.hands.push(player_info.hand.join(''));
+				res.percents.push(String(player_info.percent));
+			} else if (player_info.mode === 'spectre' && player_info.spectre.length) {
+				res.hands.push(player_info.spectre.join(','));
+				res.percents.push(String(player_info.percent));
+			}
+
+			return res;
+		}, { hands: [], percents: [] } as { hands: string[], percents: string[] });
+
+		if (!hands.length) {
+			return;
+		}
+
 		const el = document.createElement('textarea');
-		el.value = str;
+		el.value = hands.join(' vs ') + ' - ' + percents.join(' vs ');
 		el.setAttribute('readonly', '');
 		el.style.position = 'absolute';
 		el.style.left = '-9999px';
@@ -131,15 +248,9 @@ function App() {
 
 	return (
 		<div className="calculator">
-			Player1 <span className="win_percent">{p1_info}</span>
-			<Cards className="player" cards={p1} selectCard={selectP1Cards} />
-			Player2 <button onClick={() => setIsP2Spectre(!is_p2_spectre)}>$$$</button> <span className="win_percent">{p2_info}</span>
-			{is_p2_spectre
-				? <button className="show_spectre" onClick={() => setShowP2Spectre(true)}>{p2_spectre.join(",") || "SELECT SPECTRE"}</button>
-				: <Cards className="player" cards={p2} selectCard={selectP2Cards} />
-			}
+			{rendered_players_info}
 			BOARD
-			<Cards className="board" selectCard={selectBoard} cards={board} />
+			<Cards className="board" selectCard={selectBoardCard} cards={board} />
 			{is_calculated
 				? <div className="loader">Loading...</div>
 				: (
@@ -149,9 +260,9 @@ function App() {
 					</>
 				)
 			}
-			{show_cardlist && <CardList selected={selected} selectCard={selectCard} />}
+			{show_cardlist && <CardList selected={selected_cards} selectCard={selectCard} />}
 			{show_cardlist && <button onClick={() => setShowCardList(false)}>HIDE CARDLIST</button>}
-			{show_p2_spectre && <Spectre currentHands={p2_spectre} selectHands={selectP2Spectre} />}
+			{show_spectre && selected_player_info.mode === 'spectre' && <Spectre currentHands={selected_player_info.spectre} selectHands={selectPlayerSpectre} />}
 		</div>
 	);
 }
