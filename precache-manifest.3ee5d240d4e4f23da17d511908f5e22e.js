@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "8e9fe7054cf047bfc3ec0cf4687bd73d",
+    "revision": "2a7219ec988793109cbaa3feb3fd37b8",
     "url": "/shortdeck/index.html"
   },
   {
