@@ -44,7 +44,6 @@ export const computeEquityVsSpectre = (hands: [string, string][], spectre: strin
 
         for (const current_hand of combos) {
             const { wins, total } = computeWinsAndTotal([...hands, current_hand], current_board);
-            console.log(wins, total);
             w = w.map((count, index) => count + wins[index]);
             t = t + total;
 

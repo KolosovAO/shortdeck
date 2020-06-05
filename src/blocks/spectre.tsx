@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Hand } from './hand';
 
 const CARD = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6'];
@@ -16,17 +16,15 @@ const CARDS_ROW = CARD.map((c1, i1) => CARD.map((c2, i2) => {
 
 type Props = {
     selectHands: (hands: string[]) => void;
-    currentHands: string[];
+    current_hands: string[];
 }
 
-export const Spectre: React.FC<Props> = ({ selectHands, currentHands }) => {
-    const [cards, setCards] = useState<string[]>(currentHands);
-
+export const Spectre: React.FC<Props> = ({ selectHands, current_hands }) => {
     const select = (hand: string) => {
-        if (cards.includes(hand)) {
-            setCards(cards.filter((card) => card !== hand));
+        if (current_hands.includes(hand)) {
+            selectHands(current_hands.filter((card) => card !== hand));
         } else {
-            setCards(cards.concat(hand));
+            selectHands(current_hands.concat(hand));
         }
     };
 
@@ -35,11 +33,10 @@ export const Spectre: React.FC<Props> = ({ selectHands, currentHands }) => {
             {
                 CARDS_ROW.map((row, i) => (
                     <div key={i} className="spectre__row">
-                        {row.map((hand, j) => <Hand key={j} selected={cards.includes(hand)} select={select} hand={hand} />)}
+                        {row.map((hand, j) => <Hand key={j} selected={current_hands.includes(hand)} select={select} hand={hand} />)}
                     </div>
                 ))
             }
-            <button onClick={() => selectHands(cards)}>SELECT</button>
         </div>
     );
 };

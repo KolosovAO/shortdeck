@@ -24,8 +24,8 @@ type PlayerHandMode = {
 type PlayerInfo = (PlayerSpectreMode | PlayerHandMode) & { percent?: number; is_hero?: boolean; };
 
 const INIT_PLAYERS_INFO: PlayerInfo[] = [
-	{ mode: 'hand', is_hero: true, hand: [undefined, undefined], current_card_index: 0 },
-	...Array(4).fill(0).map<PlayerInfo>(() => ({ mode: 'hand', hand: [undefined, undefined], current_card_index: 0 }))
+	{ mode: 'hand', is_hero: true, hand: [undefined, undefined], current_card_index: -1 },
+	...Array(4).fill(0).map<PlayerInfo>(() => ({ mode: 'hand', hand: [undefined, undefined], current_card_index: -1 }))
 ];
 
 const compact = <T extends any>(val: T | undefined): val is NonNullable<T> => !!val;
@@ -58,7 +58,7 @@ function App() {
 						: [active_player_info.hand[0], undefined],
 					current_card_index: card_index
 				}
-				: player_info
+				: { ...player_info, current_card_index: -1 }
 			));
 			setShowCardList(true);
 		}
@@ -66,10 +66,13 @@ function App() {
 
 	const playerShowSpectre = (player_index: number) => {
 		setActivePlayer(player_index);
+		setPlayersInfo(players_info.map((player_info) => ({ ...player_info, current_card_index: -1 })));
+		setShowCardList(false);
 		setShowSpectre(true);
 	};
 
 	const selectBoardCard = (index: number) => {
+		setPlayersInfo(players_info.map((player_info) => ({ ...player_info, current_card_index: -1 })));
 		setBoardActiveIndex(index);
 		setShowCardList(true);
 	};
@@ -79,14 +82,13 @@ function App() {
 			? { mode: 'spectre', spectre }
 			: player_info
 		));
-		setShowSpectre(false);
 	};
 
 	const setSpectreMode = (index: number) => {
 		const current_spectre_mode_index = players_info.findIndex((info) => info.mode === "spectre");
 
 		setPlayersInfo(players_info.map((player_info, player_index) => player_index === current_spectre_mode_index
-			? { mode: 'hand', hand: [undefined, undefined], current_card_index: 0 }
+			? { mode: 'hand', hand: [undefined, undefined], current_card_index: -1 }
 			: player_index === index
 				? { mode: 'spectre', spectre: [] }
 				: player_info
@@ -94,27 +96,27 @@ function App() {
 	};
 
 	const rendered_players_info = players_info.map((player_info, index) => {
-		if (player_info.is_hero) {
+		if (player_info.is_hero && player_info.mode === 'hand') {
 			return (
-				<>
+				<div key={index} className="player">
 					Hero
 					{player_info.percent !== undefined && <span className="win_percent">{player_info.percent}</span>}
-					<Cards className="player" cards={(player_info as PlayerHandMode).hand} selectCard={getPlayerCardSelector(index)} />
-				</>
+					<Cards className="player_cards" selected={player_info.current_card_index} cards={player_info.hand} selectCard={getPlayerCardSelector(index)} />
+				</div>
 			);
 		}
 
 
 		return (
-			<>
+			<div key={index} className="player">
 				Player{index + 1}
-				<button onClick={() => setSpectreMode(index)}>$$$</button>
+				<button className="mode-toggler" onClick={() => setSpectreMode(index)}>%</button>
 				{player_info.percent !== undefined && <span className="win_percent">{player_info.percent}</span>}
 				{player_info.mode === "spectre"
-					? <button className="show_spectre" onClick={() => playerShowSpectre(index)}>{player_info.spectre.join(",") || "SELECT SPECTRE"}</button>
-					: <Cards className="player" cards={player_info.hand} selectCard={getPlayerCardSelector(index)} />
+					? <button className="show_spectre" onClick={() => playerShowSpectre(index)}>{player_info.spectre.join(", ") || "SELECT SPECTRE"}</button>
+					: <Cards className="player_cards" selected={player_info.current_card_index} cards={player_info.hand} selectCard={getPlayerCardSelector(index)} />
 				}
-			</>
+			</div>
 		);
 	});
 
@@ -135,6 +137,9 @@ function App() {
 		});
 
 		if (!spectre) {
+			if (hands.length < 2) {
+				return;
+			}
 			setIsCalculated(true);
 			setTimeout(() => {
 				const percent = computeEquity(hands, board.filter(compact));
@@ -152,6 +157,9 @@ function App() {
 				setIsCalculated(false);
 			});
 		} else {
+			if (hands.length < 1) {
+				return;
+			}
 			const generator = computeEquityVsSpectre(hands, spectre, board.filter(compact))();
 			const nextIteration = () => setTimeout(() => {
 				const next = generator.next();
@@ -218,6 +226,18 @@ function App() {
 		}
 	};
 
+	const onCalculatorClick = (e: React.MouseEvent<HTMLDivElement>) => {
+		if (show_cardlist && !(e.target as any).closest(".card-list")) {
+			setShowCardList(false);
+			setPlayersInfo(players_info.map((player_info) => ({ ...player_info, current_card_index: -1 })));
+			if (board_active_index) {
+				setBoardActiveIndex(-1);
+			}
+		} else if (show_spectre && !(e.target as any).closest(".spectre")) {
+			setShowSpectre(false);
+		}
+	};
+
 	const copyToClipboard = () => {
 		const { hands, percents } = players_info.reduce((res, player_info) => {
 			if (player_info.mode === 'hand' && player_info.hand[0] && player_info.hand[1]) {
@@ -247,22 +267,27 @@ function App() {
 	};
 
 	return (
-		<div className="calculator">
-			{rendered_players_info}
-			BOARD
-			<Cards className="board" selectCard={selectBoardCard} cards={board} />
-			{is_calculated
-				? <div className="loader">Loading...</div>
-				: (
-					<>
-						<button onClick={compute}>COMPUTE</button>
-						<button onClick={copyToClipboard}>COPY</button>
-					</>
-				)
-			}
-			{show_cardlist && <CardList selected={selected_cards} selectCard={selectCard} />}
-			{show_cardlist && <button onClick={() => setShowCardList(false)}>HIDE CARDLIST</button>}
-			{show_spectre && selected_player_info.mode === 'spectre' && <Spectre currentHands={selected_player_info.spectre} selectHands={selectPlayerSpectre} />}
+		<div className="calculator" onClick={onCalculatorClick}>
+			<div className="left-row">
+				{rendered_players_info}
+				<div className="board">
+					BOARD
+					<Cards selected={board_active_index} className="board_cards" selectCard={selectBoardCard} cards={board} />
+				</div>
+				{is_calculated
+					? <div className="loader">Loading...</div>
+					: (
+						<>
+							<button className="action-button" onClick={compute}>COMPUTE</button>
+							<button className="action-button" onClick={copyToClipboard}>COPY</button>
+						</>
+					)
+				}
+			</div>
+			<div className="right-row">
+				{show_cardlist && <CardList selected={selected_cards} selectCard={selectCard} />}
+				{show_spectre && selected_player_info.mode === 'spectre' && <Spectre current_hands={selected_player_info.spectre} selectHands={selectPlayerSpectre} />}
+			</div>
 		</div>
 	);
 }

@@ -1,7 +1,12 @@
+* {
+	font-family: 'Khula', sans-serif;
+}
+
 .calculator {
-	width: 484px;
+	width: 900px;
 	height: 680px;
-	background: lightgray;
+	background: lightgreen;
+	display: flex;
 }
 
 .card-list {
@@ -10,46 +15,72 @@
 	width: 420px;
 }
 
+.player, .board {
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+	width: 230px;
+}
+
 .card {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	width: 40px;
-	height: 40px;
+	height: 52px;
 	border: 1px solid black;
 	margin: 2px;
 
 	cursor: pointer;
 
-	color: white;
+	background: white;
 	font-size: 24px;
+	font-weight: 600;
+
+	position: relative;
+}
+
+.card__top {
+	position: absolute;
+	top: 0;
+}
+
+.card__bottom {
+	position: absolute;
+	bottom: -8px;
+}
+
+.card__selected {
+	top: -10px;
 }
 
 .card__suite-c {
-	background-color: lightgreen;
+	color: green;
 }
 
 .card__suite-h {
-	background-color: lightcoral;
+	color: red;
 }
 
 .card__suite-d {
-	background-color: lightblue;
+	color: blue;
 }
 
 .card__suite-s {
-	background-color: black;
+	color: black;
 }
 
 .card__empty {
-	background-color: lightgray;
+	background-color: white;
+	background-image: linear-gradient(45deg, #3f71a4 25%, transparent 25%, transparent 75%, #3f71a4 75%), 
+		linear-gradient(-45deg,#3f71a4 25%, transparent 25%, transparent 75%, #3f71a4 75%);
+	background-size: 4px 4px;
+	background-position: 0 0, 0 0;
 }
 
 .card__disabled {
 	opacity: 0.2;
 }
 
-.board, .player {
+.board_cards, .player_cards {
 	display: flex;
 }
 
@@ -67,14 +98,11 @@
 	border: 1px solid black;
 	margin: 2px;
 
-	opacity: 0.7;
-
-	cursor: pointer;
 	font-size: 20px;
 }
 
 .hand:hover {
-	opacity: 1;
+	cursor: pointer;
 }
 
 .hand__pair {
@@ -90,18 +118,34 @@
 }
 
 .hand__selected {
-	opacity: 1;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+	background: black;
+	color: white;
 }
 
 .show_spectre {
 	display: block;
-	height: 40px;
+	height: 58px;
 }
 
 .win_percent {
-	float: right;
-	margin-right: 300px;
+	position: absolute;
+	left: 100px;
+}
+
+.action-button {
+	width: 115px;
+	height: 25px;
+}
+
+.mode-toggler {
+	border-radius: 25%;
+	width: 32px;
+	border: none;
+	cursor: pointer;
+}
+
+.mode-toggler:focus {
+	outline: none;
 }
 
 .loader,
