@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/shortdeck/static/css/main.b704e50d.chunk.css",
-    "main.js": "/shortdeck/static/js/main.11253118.chunk.js",
-    "main.js.map": "/shortdeck/static/js/main.11253118.chunk.js.map",
+    "main.js": "/shortdeck/static/js/main.ef2db386.chunk.js",
+    "main.js.map": "/shortdeck/static/js/main.ef2db386.chunk.js.map",
     "runtime-main.js": "/shortdeck/static/js/runtime-main.79dec00f.js",
     "runtime-main.js.map": "/shortdeck/static/js/runtime-main.79dec00f.js.map",
     "static/js/2.46ef1539.chunk.js": "/shortdeck/static/js/2.46ef1539.chunk.js",
     "static/js/2.46ef1539.chunk.js.map": "/shortdeck/static/js/2.46ef1539.chunk.js.map",
     "index.html": "/shortdeck/index.html",
-    "precache-manifest.3ee5d240d4e4f23da17d511908f5e22e.js": "/shortdeck/precache-manifest.3ee5d240d4e4f23da17d511908f5e22e.js",
+    "precache-manifest.748637bd018ddbd6db8cabe3ac766cfc.js": "/shortdeck/precache-manifest.748637bd018ddbd6db8cabe3ac766cfc.js",
     "service-worker.js": "/shortdeck/service-worker.js",
     "static/css/main.b704e50d.chunk.css.map": "/shortdeck/static/css/main.b704e50d.chunk.css.map",
     "static/js/2.46ef1539.chunk.js.LICENSE.txt": "/shortdeck/static/js/2.46ef1539.chunk.js.LICENSE.txt"
@@ -17,6 +17,6 @@
     "static/js/runtime-main.79dec00f.js",
     "static/js/2.46ef1539.chunk.js",
     "static/css/main.b704e50d.chunk.css",
-    "static/js/main.11253118.chunk.js"
+    "static/js/main.ef2db386.chunk.js"
   ]
 }
