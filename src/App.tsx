@@ -100,7 +100,7 @@ function App() {
 			return (
 				<div key={index} className="player">
 					Hero
-					{player_info.percent !== undefined && <span className="win_percent">{player_info.percent}</span>}
+					{player_info.percent !== undefined && <span className="win_percent">{player_info.percent}%</span>}
 					<Cards className="player_cards" selected={player_info.current_card_index} cards={player_info.hand} selectCard={getPlayerCardSelector(index)} />
 				</div>
 			);
@@ -111,7 +111,7 @@ function App() {
 			<div key={index} className="player">
 				Player{index + 1}
 				<button className="mode-toggler" onClick={() => setSpectreMode(index)}>%</button>
-				{player_info.percent !== undefined && <span className="win_percent">{player_info.percent}</span>}
+				{player_info.percent !== undefined && <span className="win_percent">{player_info.percent}%</span>}
 				{player_info.mode === "spectre"
 					? <button className="show_spectre" onClick={() => playerShowSpectre(index)}>{player_info.spectre.join(", ") || "SELECT SPECTRE"}</button>
 					: <Cards className="player_cards" selected={player_info.current_card_index} cards={player_info.hand} selectCard={getPlayerCardSelector(index)} />
@@ -254,9 +254,14 @@ function App() {
 		if (!hands.length) {
 			return;
 		}
+		let result = hands.join(' vs ') + ' - ' + percents.join(' vs ');
+		const current_board_cards = board.filter(compact);
+		if (current_board_cards.length) {
+			result = current_board_cards.join('') + ' : ' + result;
+		}
 
 		const el = document.createElement('textarea');
-		el.value = hands.join(' vs ') + ' - ' + percents.join(' vs ');
+		el.value = result;
 		el.setAttribute('readonly', '');
 		el.style.position = 'absolute';
 		el.style.left = '-9999px';

@@ -130,6 +130,9 @@
 .win_percent {
 	position: absolute;
 	left: 100px;
+	background: black;
+	color: white;
+	padding: 0 8px;
 }
 
 .action-button {
