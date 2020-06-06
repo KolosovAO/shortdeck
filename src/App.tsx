@@ -73,6 +73,7 @@ function App() {
 
 	const selectBoardCard = (index: number) => {
 		setPlayersInfo(players_info.map((player_info) => ({ ...player_info, current_card_index: -1 })));
+		setBoard(board.map((card, card_index) => card_index < index ? card : undefined) as Board);
 		setBoardActiveIndex(index);
 		setShowCardList(true);
 	};
@@ -149,9 +150,9 @@ function App() {
 					i++;
 				}
 
-				setPlayersInfo(players_info.map((player_info, index) => hand_index_to_percent[index]
+				setPlayersInfo(players_info.map((player_info, index) => hand_index_to_percent[index] !== undefined
 					? { ...player_info, percent: hand_index_to_percent[index] }
-					: player_info
+					: { ...player_info, percent: undefined }
 				));
 
 				setIsCalculated(false);
@@ -177,7 +178,7 @@ function App() {
 						? { ...player_info, percent: hand_index_to_percent[index] }
 						: index === spectre_index
 							? { ...player_info, percent: next.value[next.value.length - 1] }
-							: player_info
+							: { ...player_info, percent: undefined }
 					));
 
 					nextIteration();
@@ -230,7 +231,7 @@ function App() {
 		if (show_cardlist && !(e.target as any).closest(".card-list")) {
 			setShowCardList(false);
 			setPlayersInfo(players_info.map((player_info) => ({ ...player_info, current_card_index: -1 })));
-			if (board_active_index) {
+			if (board_active_index > -1) {
 				setBoardActiveIndex(-1);
 			}
 		} else if (show_spectre && !(e.target as any).closest(".spectre")) {
@@ -280,7 +281,7 @@ function App() {
 					<Cards selected={board_active_index} className="board_cards" selectCard={selectBoardCard} cards={board} />
 				</div>
 				{is_calculated
-					? <div className="loader">Loading...</div>
+					? <div className="loader">Calculating...</div>
 					: (
 						<>
 							<button className="action-button" onClick={compute}>COMPUTE</button>

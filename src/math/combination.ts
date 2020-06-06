@@ -198,6 +198,10 @@ export const compareHands = (hands: string[][], board: string[]): number[] => {
         }
     });
 
+    if (best_kickers.length === 1) {
+        return [best_kickers[0].index];
+    }
+
     let winners: number[] = [];
     let best_kicker = [-Infinity];
 
